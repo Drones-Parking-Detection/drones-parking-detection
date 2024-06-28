@@ -5,34 +5,40 @@ import scala.annotation.tailrec
 
 object Drones {
   private val rand = new scala.util.Random
-  private type droneData = (Int, LocalDateTime, (Float, Float), Int)
+  private type droneDataType = (Int, LocalDateTime, (Float, Float), Int)
 
-  private def formatCoordinates(float: Float, nb_decimals : Int) = {
-    BigDecimal(float).setScale(nb_decimals, BigDecimal.RoundingMode.HALF_UP).toFloat
+//  Format them keeping only 4 decimals
+  private def formatCoordinates(float: Float): Float = {
+    BigDecimal(float).setScale(4, BigDecimal.RoundingMode.HALF_UP).toFloat
   }
 
-
+// Generate random geographical coordinates
   private def randomCoordinates(): (Float, Float) = {
-    val latitude = formatCoordinates(rand.between(-90.0, 90.0).toFloat, 4)
-    val longitude = formatCoordinates(rand.between(-180.0, 180.0).toFloat, 4)
+    val latitude = formatCoordinates(rand.between(-90.0, 90.0).toFloat)
+    val longitude = formatCoordinates(rand.between(-180.0, 180.0).toFloat)
     (latitude, longitude)
   }
 
-  private def randomDroneData() : droneData = {
+// Generate data of one drone
+  private def randomDroneData() : droneDataType = {
+//    actual timestamp
     val time = LocalDateTime.now()
+//    random drone id
     val id = rand.nextInt(100) // how many drones ?
     val coordinates = randomCoordinates()
+//    percentage of being parked correctly
     val percentage = rand.nextInt(100)
     (id, time, coordinates, percentage)
   }
 
   @tailrec
-  private def rec_nRandomDataDrones(n: Int, l : List[droneData]) : List[droneData]= {
+  private def rec_nRandomDataDrones(n: Int, l : List[droneDataType]) : List[droneDataType]= {
     n match {
       case 0 => l
       case n => rec_nRandomDataDrones(n-1, randomDroneData()::l)
     }
   }
 
-  def nRandomDataDrones(n : Int):List[droneData] = rec_nRandomDataDrones(n, List())
+//  Generate random data for n drones
+  def nRandomDataDrones(n : Int):List[droneDataType] = rec_nRandomDataDrones(n, List())
 }
