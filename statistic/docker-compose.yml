@@ -1,0 +1,31 @@
+services:
+  s3:
+    image: quay.io/minio/minio
+    container_name: "s3-container"
+    command: server /data --console-address ":9090"
+    environment:
+      - MINIO_ROOT_USER=UserParking
+      - MINIO_ROOT_PASSWORD=PassWordParking
+    volumes:
+      - "~/minio/data:/data"
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+  
+  spark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: "spark-container"
+    depends_on:
+      - s3
+    environment:
+      - SPARK_MASTER_NAME=spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_DRIVER_MEMORY=2G
+    ports:
+      - "4040:4040"
+      - "7077:7077"
+      - "8081:8081"
