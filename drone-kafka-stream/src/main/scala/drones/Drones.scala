@@ -5,7 +5,7 @@ import scala.annotation.tailrec
 
 object Drones {
   private val rand = new scala.util.Random
-  private type droneDataType = (Int, LocalDateTime, (Float, Float), Int)
+  type droneDataType = (Int, LocalDateTime, (Float, Float), Int)
 
 //  Format them keeping only 4 decimals
   private def formatCoordinates(float: Float): Float = {
@@ -20,7 +20,7 @@ object Drones {
   }
 
 // Generate one data
-  private def randomDroneData() : droneDataType = {
+  def randomDroneData() : droneDataType = {
 //    actual timestamp
     val time = LocalDateTime.now()
 //    random drone id
