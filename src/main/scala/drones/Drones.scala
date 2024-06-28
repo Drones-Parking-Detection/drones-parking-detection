@@ -19,7 +19,7 @@ object Drones {
     (latitude, longitude)
   }
 
-// Generate data of one drone
+// Generate one data
   private def randomDroneData() : droneDataType = {
 //    actual timestamp
     val time = LocalDateTime.now()
@@ -39,6 +39,6 @@ object Drones {
     }
   }
 
-//  Generate random data for n drones
+//  Generate n random data
   def nRandomDataDrones(n : Int):List[droneDataType] = rec_nRandomDataDrones(n, List())
 }
