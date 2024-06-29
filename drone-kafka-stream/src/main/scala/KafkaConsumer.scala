@@ -27,10 +27,10 @@ object KafkaConsumer extends App{
       val alertDataTmp = ujson.read(record.value())
 
       val alertData = Obj(
-        "id" -> 1,
+        "id" -> alertDataTmp("id"),
         "timestamp" -> alertDataTmp("time"),
-        "coordinates" -> Arr(49.0, 5),
-        "percentage" -> 75,
+        "coordinates" -> Arr(alertDataTmp("coordinates").arr(0), alertDataTmp("coordinates").arr(1)),
+        "percentage" -> alertDataTmp("percentage"),
         "address" -> "France"
       )
 
