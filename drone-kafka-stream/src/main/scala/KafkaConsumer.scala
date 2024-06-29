@@ -1,7 +1,6 @@
 
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecords, KafkaConsumer}
 import org.apache.kafka.common.serialization.{IntegerDeserializer, StringDeserializer}
-import ujson.{Arr, Obj}
 
 import java.time.{Duration, Instant}
 import java.util.Properties

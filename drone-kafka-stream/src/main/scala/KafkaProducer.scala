@@ -6,20 +6,25 @@ import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import org.apache.kafka.streams.scala.serialization.Serdes
 
 import java.util.Properties
+import scala.concurrent._
+import scala.concurrent.duration._
+import ExecutionContext.Implicits.global
 object KafkaProducer extends App {
 
-  val props = new Properties()
-  props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
-  props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[IntegerSerializer].getName)
-  props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer].getName)
+  val nbDrones = 1
+  val nbData = 10
 
-  val producer = new KafkaProducer[Int, String](props)
   val topic = "drones-data"
 
-  val dataTest = Drones.randomDroneData()
+  val futures = (1 to nbDrones)
+    .map{id => Future{
+      val producer = new Producer(id, topic)
+      producer.sendData(nbData)
+    }}
 
-  val res = new ProducerRecord[Int, String](topic, 1, toJson(dataTest))
-  producer.send(res)
+  Await.result(Future.sequence(futures), Duration.Inf)
+  println("All producers have finished sending messages.")
 
-  producer.close()
+
+
 }
