@@ -14,13 +14,11 @@ services:
   
   spark:
     build:
-      context: ./processToDataLake
+      context: ./kafkaToMinio
       dockerfile: Dockerfile
     container_name: "spark-container"
     depends_on:
       - s3
-      - zookeeper
-      - kafka
     environment:
       - SPARK_MASTER_NAME=spark-master
       - SPARK_MASTER_PORT=7077
