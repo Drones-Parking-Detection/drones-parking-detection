@@ -15,34 +15,20 @@ object Drones {
 
 // Generate random geographical coordinates
   private def randomCoordinates(): (Float, Float) = {
-//    val latitude = formatCoordinates(rand.between(-90.0, 90.0).toFloat)
-//    val longitude = formatCoordinates(rand.between(-180.0, 180.0).toFloat)
-//    (latitude, longitude)
-    (-1, 1)
+    val latitude = formatCoordinates(rand.nextFloat() * (47.0f - 41.0f) + 41.0f)
+    val longitude = formatCoordinates(rand.nextFloat() * (4.0f - (-2.0f)) + (-2.0f))
+    (latitude, longitude)
   }
 
 // Generate one data
-  def randomDroneData() : DroneData = {
+  def randomDroneData(id: Int) : DroneData = {
 //    actual timestamp
     val time = LocalDateTime.now()
-//    random drone id
-    val id = rand.nextInt(100) // how many drones ?
     val coordinates = randomCoordinates()
 //    percentage of being parked correctly
     val percentage = rand.nextInt(100)
     DroneData(id, time, coordinates, percentage)
   }
-
-  @tailrec
-  private def rec_nRandomDataDrones(n: Int, l : List[DroneData]) : List[DroneData]= {
-    n match {
-      case 0 => l
-      case n => rec_nRandomDataDrones(n-1, randomDroneData()::l)
-    }
-  }
-
-//  Generate n random data
-  def nRandomDataDrones(n : Int):List[DroneData] = rec_nRandomDataDrones(n, List())
 }
 
 
