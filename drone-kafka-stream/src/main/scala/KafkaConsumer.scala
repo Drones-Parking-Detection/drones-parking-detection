@@ -3,11 +3,10 @@ import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecords, Kafka
 import org.apache.kafka.common.serialization.{IntegerDeserializer, StringDeserializer}
 import ujson.{Arr, Obj}
 
-import java.time.{Duration, Instant}
 import java.util.Properties
 import scala.collection.JavaConverters._
 
-
+import ujson._
 
 
 object KafkaConsumer extends App{
@@ -20,34 +19,32 @@ object KafkaConsumer extends App{
   val consumer: KafkaConsumer[Int, String] = new KafkaConsumer[Int, String](props)
   consumer.subscribe(List("alert-data").asJava)
 
-//  val records: ConsumerRecords[Int, String] = consumer.poll(Duration.ofMillis(100))
-//  records.asScala.foreach { record =>
-//    println(s"${record.key()} and: ${record.value()}")
-//    while (true) {
-//      val records: ConsumerRecords[Int, String] = consumer.poll(Duration.ofMillis(100))
-//      records.asScala.foreach { record =>
-//        println(s"Key: ${record.key()}, Value: ${record.value()}")
-////        val alertData = ujson.read(record.value())
-//        val alertData = Obj(
-//          "id" -> 1,
-//          "timestamp" -> Instant.now().toString,
-//          "coordinates" -> Arr(40.712776, -74.005974), // New York City coordinates
-//          "percentage" -> 75,
-//          "address" -> "123 Main St, New York, NY 10001"
-//        )
-//        val response = requests.post(
-//          url = "http://localhost:5000/add_alert",
-//          data = ujson.write(alertData),
-////            data = ujson.write([40.712776, -74.005974]),
-//          headers = Map("Content-Type" -> "application/json")
-//        )
-//
-//        if (response.statusCode == 200) {
-//          println("Alert sent to server successfully!")
-//        } else {
-//          println(s"Failed to send alert to server: ${response.statusCode} ${response.text()}")
-//        }
-//      }
-//    }
-//  }
+
+  while (true) {
+    val records: ConsumerRecords[Int, String] = consumer.poll(java.time.Duration.ofMillis(100))
+    records.asScala.foreach { record =>
+      println(s"Key: ${record.key()}, Value: ${record.value()}")
+      val alertDataTmp = ujson.read(record.value())
+
+      val alertData = Obj(
+        "id" -> 1,
+        "timestamp" -> alertDataTmp("time"),
+        "coordinates" -> Arr(49.0, 5),
+        "percentage" -> 75,
+        "address" -> "France"
+      )
+
+      val response = requests.post(
+        url = "http://localhost:5000/add_alert",
+        data = write(alertData),
+        headers = Map("Content-Type" -> "application/json")
+      )
+
+      if (response.statusCode == 200) {
+        println("Alert sent to server successfully!")
+      } else {
+        println(s"Failed to send alert to server: ${response.statusCode} ${response.text()}")
+      }
+    }
+  }
 }
