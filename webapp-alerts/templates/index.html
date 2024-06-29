@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Alert Map</title>
@@ -10,28 +11,46 @@
         }
     </style>
 </head>
+
 <body>
     <div id="map"></div>
+    <div id="sidebar">
+        <h2>Recent Alerts</h2>
+        <div id="alert-list"></div>
+    </div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        const map = L.map('map').setView([0, 0], 2);
+        const map = L.map('map').setView([46.603354, 2], 7.2);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
+
+        let l = []
+        let l2 = []
         async function fetchAlerts() {
             const response = await fetch('/alerts');
             const alerts = await response.json();
+
+            console.log(alerts);
+
+            l = alerts.split(l.length, alerts.length - l.length)
+            if (l.length == l2.length)
+                return
+            
+            l2 = [...l]
+
+
             alerts.forEach(alert => {
                 const marker = L.marker([alert.coordinates[0], alert.coordinates[1]]).addTo(map);
                 marker.bindPopup(`<b>${alert.address}</b><br>${alert.timestamp}`).openPopup();
             });
+            
         }
 
         fetchAlerts();
-        setInterval(fetchAlerts, 1000); // Refresh alerts every 10 seconds
+        setInterval(fetchAlerts, 5000); // Refresh alerts every 10 seconds
     </script>
 </body>
-</html>
 
+</html>
