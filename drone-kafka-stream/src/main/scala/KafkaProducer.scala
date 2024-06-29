@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory
 object KafkaProducer extends App {
   val logger = LoggerFactory.getLogger(KafkaProducer.getClass)
 
-  val nbDrones = 2
-  val nbData = 10
+  val nbDrones = 20
+  val nbData = 100
 
   val topic = "drones-data"
 
@@ -19,7 +19,4 @@ object KafkaProducer extends App {
 
   Await.result(Future.sequence(futures), Duration.Inf)
   logger.debug("All producers have finished sending messages.")
-
-
-
 }

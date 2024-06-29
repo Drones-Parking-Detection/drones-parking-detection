@@ -5,51 +5,119 @@
     <meta charset="UTF-8">
     <title>Alert Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        #map {
+         #map {
             height: 100vh;
+            width: 80%;
+        }
+
+        #main-container {
+            display: flex;
+        }
+
+        #sidebar {
+            display: flex;
+            flex-direction: column;
+            width: 20%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #alert-list {
+            height: 100vh;
+            overflow-y: auto;
+            float: right;
+            width: 100%;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .alert-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
 
 <body>
-    <div id="map"></div>
-    <div id="sidebar">
-        <h2>Recent Alerts</h2>
-        <div id="alert-list"></div>
+    <div id="main-container">
+        <div id="map"></div>
+        <div id="sidebar">
+            <h2>Recent Alerts</h2>
+            <div id="alert-list"></div>
+        </div>
     </div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
+        // const map = L.map('map').setView([46.603354, 2], 7.2);
+
+        // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // }).addTo(map);
+
+
+        $(document).ready(function () {
+            let socket = io();
+
+            // socket.on('connect', function () {
+            //     console.log('Connected to server');
+            // });
+
+            // socket.on('disconnect', function () {
+            //     console.log('Disconnected from server');
+            // });
+
+            socket.on('new_alert', function (alert) {
+                $('#alerts-list').append('<li>' + JSON.stringify(alert) + '</li>');
+                console.log(alert)
+                fetchAlerts(alert)
+            });
+        });
+
         const map = L.map('map').setView([46.603354, 2], 7.2);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         }).addTo(map);
-
-
-        let l = []
-        let l2 = []
-        async function fetchAlerts() {
-            const response = await fetch('/alerts');
-            const alerts = await response.json();
-
-            console.log(alerts);
-
-            l = alerts.split(l.length, alerts.length - l.length)
-            if (l.length == l2.length)
-                return
+        
+        let markers = {};
+        let ID = 0
+        async function fetchAlerts(alert) {
+            const sidebar = document.getElementById('alert-list');
+            const marker = L.marker([alert.coordinates[0], alert.coordinates[1]]).addTo(map);
+            markers[ID] = marker; 
+            marker.bindPopup(`<b>${alert.address}</b><br>${alert.timestamp}`).openPopup();
             
-            l2 = [...l]
-
-
-            alerts.forEach(alert => {
-                const marker = L.marker([alert.coordinates[0], alert.coordinates[1]]).addTo(map);
-                marker.bindPopup(`<b>${alert.address}</b><br>${alert.timestamp}`).openPopup();
-            });
+            const sidebarItem = document.createElement('div');
+            sidebarItem.classList.add('alert-item');
+            sidebarItem.setAttribute('data-id', ID); 
+            sidebarItem.innerHTML = `
+            <b>DroneId: ${alert.id}</b>
+            <b>${alert.address}</b><br>
+            Coordinates: [${alert.coordinates[0]}, ${alert.coordinates[1]}]<br>
+            Timestamp: ${alert.timestamp}<br>
+            <button class="remove-btn" onclick="removeAlert('${ID}')">Take</button>
+            `;
             
+            sidebar.appendChild(sidebarItem);
+            ID++
         }
 
-        fetchAlerts();
-        setInterval(fetchAlerts, 5000); // Refresh alerts every 10 seconds
+        function removeAlert(alertId) {
+            const sidebarItem = document.querySelector(`.alert-item[data-id="${alertId}"]`);
+            if (sidebarItem) {
+                sidebarItem.remove();
+            }
+
+            if (markers[alertId]) {
+                map.removeLayer(markers[alertId]);
+                delete markers[alertId]; 
+            }  
+        }
+
+
+
     </script>
 </body>
 
