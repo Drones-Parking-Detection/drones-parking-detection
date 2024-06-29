@@ -20,7 +20,6 @@ object KafkaStream extends App {
 
   val inputTopic : String = "drones-data"
   val wronglyParkedTopic : String = "alert-data"
-  val analysisTopic : String = "analysis-data"
 
   val inputStream = builder.stream[Int, String](inputTopic)
 
@@ -31,7 +30,6 @@ object KafkaStream extends App {
 
 
   alertProcessedStream.to(wronglyParkedTopic)
-  inputStream.to(analysisTopic)
   val streams = new KafkaStreams(builder.build(),streamsConfig)
   streams.start()
 }
