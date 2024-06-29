@@ -15,8 +15,8 @@ object Drones {
 
 // Generate random geographical coordinates
   private def randomCoordinates(): (Float, Float) = {
-    val latitude = formatCoordinates(rand.nextFloat() * (47.0f - 41.0f) + 41.0f)
-    val longitude = formatCoordinates(rand.nextFloat() * (4.0f - (-2.0f)) + (-2.0f))
+    val latitude = formatCoordinates(rand.nextFloat() * (49.5f - 44.0f) + 44.0f)
+    val longitude = formatCoordinates(rand.nextFloat() * (6.0f - (-0.0f)) + (-0.0f))
     (latitude, longitude)
   }
 

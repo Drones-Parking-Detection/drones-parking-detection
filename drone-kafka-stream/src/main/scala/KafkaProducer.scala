@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 import ExecutionContext.Implicits.global
 object KafkaProducer extends App {
 
-  val nbDrones = 1
+  val nbDrones = 2
   val nbData = 10
 
   val topic = "drones-data"

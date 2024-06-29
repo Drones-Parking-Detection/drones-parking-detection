@@ -8,7 +8,10 @@ libraryDependencies ++= Seq(
   "org.apache.kafka" %% "kafka-streams-scala" % "2.8.0",
   "io.circe" %% "circe-core" % "0.14.1",
   "io.circe" %% "circe-generic" % "0.14.1",
-  "io.circe" %% "circe-parser" % "0.14.1"
+  "io.circe" %% "circe-parser" % "0.14.1",
+  "org.slf4j" % "slf4j-simple" % "1.7.28",
+  "com.lihaoyi" %% "requests" % "0.9.0-RC1",
+  "com.lihaoyi" %% "upickle" % "3.3.1"
 )
 lazy val root = (project in file("."))
   .settings(
