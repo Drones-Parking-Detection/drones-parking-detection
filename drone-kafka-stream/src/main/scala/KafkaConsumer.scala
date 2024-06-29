@@ -1,19 +1,21 @@
 
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecords, KafkaConsumer}
 import org.apache.kafka.common.serialization.{IntegerDeserializer, StringDeserializer}
+import org.slf4j.LoggerFactory
 
 import java.util.Properties
 import scala.collection.JavaConverters._
-
 import ujson._
 
 
 object KafkaConsumer extends App{
+  val logger = LoggerFactory.getLogger(KafkaConsumer.getClass)
   val props = new Properties()
   props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092") // Update with your Kafka broker address
   props.put(ConsumerConfig.GROUP_ID_CONFIG, "alert-consumer-group")
   props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[IntegerDeserializer].getName)
   props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer].getName)
+  props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
 
   val consumer: KafkaConsumer[Int, String] = new KafkaConsumer[Int, String](props)
   consumer.subscribe(List("alert-data").asJava)
@@ -22,7 +24,7 @@ object KafkaConsumer extends App{
   while (true) {
     val records: ConsumerRecords[Int, String] = consumer.poll(java.time.Duration.ofMillis(100))
     records.asScala.foreach { record =>
-      println(s"Key: ${record.key()}, Value: ${record.value()}")
+      logger.debug(s"Key: ${record.key()}, Value: ${record.value()}")
       val alertDataTmp = ujson.read(record.value())
 
       val alertData = Obj(
@@ -40,9 +42,10 @@ object KafkaConsumer extends App{
       )
 
       if (response.statusCode == 200) {
-        println("Alert sent to server successfully!")
+        consumer.commitSync()
+        logger.debug("Alert sent to server successfully!")
       } else {
-        println(s"Failed to send alert to server: ${response.statusCode} ${response.text()}")
+        logger.debug(s"Failed to send alert to server: ${response.statusCode} ${response.text()}")
       }
     }
   }

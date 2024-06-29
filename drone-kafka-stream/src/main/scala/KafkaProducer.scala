@@ -1,15 +1,10 @@
-import drones.DroneSerializer.toJson
-import drones.Drones
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
-import org.apache.kafka.common.serialization.{IntegerSerializer, StringSerializer}
-import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
-import org.apache.kafka.streams.scala.serialization.Serdes
-
-import java.util.Properties
 import scala.concurrent._
 import scala.concurrent.duration._
 import ExecutionContext.Implicits.global
+import org.slf4j.LoggerFactory
+
 object KafkaProducer extends App {
+  val logger = LoggerFactory.getLogger(KafkaProducer.getClass)
 
   val nbDrones = 2
   val nbData = 10
@@ -23,7 +18,7 @@ object KafkaProducer extends App {
     }}
 
   Await.result(Future.sequence(futures), Duration.Inf)
-  println("All producers have finished sending messages.")
+  logger.debug("All producers have finished sending messages.")
 
 
 
