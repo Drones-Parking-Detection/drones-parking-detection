@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Alert Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    
+    <style>
+        #map {
+            height: 100vh;
+            width: 80%;
+        }
+
+        #main-container {
+            display: flex;
+        }
+
+        #sidebar {
+            display: flex;
+            flex-direction: column;
+            width: 20%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #alert-title {
+            margin: 0px;
+            padding: 1rem;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+            width: 85%;
+        }
+
+        #alert-list {
+            height: 100vh;
+            overflow-y: auto;
+            float: right;
+            width: 100%;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .alert-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main-container">
+        <div id="map"></div>
+        <div id="sidebar">
+            <h2 id="alert-title">Recent Alerts: (0)</h2>
+            <div id="alert-list"></div>
+        </div>
+    </div>
+    
+    <script>
+        // const map = L.map('map').setView([46.603354, 2], 7.2);
+
+        // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // }).addTo(map);
+
+
+        $(document).ready(function () {
+            let socket = io();
+
+            // socket.on('connect', function () {
+            //     console.log('Connected to server');
+            // });
+
+            // socket.on('disconnect', function () {
+            //     console.log('Disconnected from server');
+            // });
+
+            socket.on('new_alert', function (alert) {
+                $('#alerts-list').append('<li>' + JSON.stringify(alert) + '</li>');
+                console.log(alert)
+                fetchAlerts(alert)
+            });
+        });
+
+        const map = L.map('map').setView([46.603354, 2], 7.2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        }).addTo(map);
+
+        // const heat = L.heatLayer([], {
+        //     radius: 70,
+        //     blur: 0,
+        //     maxZoom: 17,
+        //     gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' }
+        // }).addTo(map);
+
+        let markers = {};
+        let ID = 0
+        async function fetchAlerts(alert) {
+            const sidebar = document.getElementById('alert-list');
+            const marker = L.marker([alert.coordinates[0], alert.coordinates[1]]).addTo(map);
+            markers[ID] = marker;
+            marker.bindPopup(`<b>${alert.address}</b><br>${alert.timestamp}`).openPopup();
+
+            // heat.addLatLng([alert.coordinates[0], alert.coordinates[1], 10]);
+            // console.log("Added to heatmap: ", [alert.coordinates[0], alert.coordinates[1], 2]);
+            // console.log(heat.addLatLng())
+
+
+            const sidebarItem = document.createElement('div');
+            sidebarItem.classList.add('alert-item');
+            sidebarItem.setAttribute('data-id', ID);
+            sidebarItem.innerHTML = `
+            <b>DroneId: ${alert.id}</b><br>
+            <b>Country: ${alert.address}</b><br>
+            Latitude: ${alert.coordinates[0]}, Longitude: ${alert.coordinates[1]}]<br>
+            Timestamp: ${alert.timestamp}<br>
+            <button class="remove-btn" onclick="removeAlert('${ID}')">TAKE</button>
+            `;
+
+            sidebar.appendChild(sidebarItem);
+            ID++
+            updateAlertTitle()
+        }
+
+        function updateAlertTitle() {
+            const alertCount = document.getElementById('alert-list').children.length;
+            document.getElementById('alert-title').innerText = `Recent Alerts: (${alertCount})`;
+        }
+
+        function removeAlert(alertId) {
+            const sidebarItem = document.querySelector(`.alert-item[data-id="${alertId}"]`);
+            if (sidebarItem) {
+                sidebarItem.remove();
+            }
+
+            if (markers[alertId]) {
+                // const latlng = markers[alertId].getLatLng();
+                // console.log(latlng)
+                // console.log(heat._latlngs)
+                // heat.setLatLngs(heat._latlngs.filter(ll => !(ll[0] === latlng.lat && ll[1] === latlng.lng)));
+                map.removeLayer(markers[alertId]);
+                delete markers[alertId];
+            }
+
+            updateAlertTitle();
+        }
+
+
+
+    </script>
+</body>
+
+</html>
