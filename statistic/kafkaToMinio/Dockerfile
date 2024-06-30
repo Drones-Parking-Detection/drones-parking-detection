@@ -4,7 +4,7 @@ USER root
 
 # Installer les dépendances nécessaires, y compris sbt
 RUN apt-get update && \
-    apt-get install -y python3-pip wget curl gnupg2 && \
+    apt-get install -y python3-pip wget curl gnupg2 vim && \
     pip3 install boto3 && \
     wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar && \
     wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.874/aws-java-sdk-bundle-1.11.874.jar && \
@@ -16,7 +16,11 @@ RUN apt-get update && \
 
 USER 1001
 
+
 RUN mkdir -p /opt/spark-apps
 WORKDIR /opt/spark-apps
 
 COPY . /opt/spark-apps
+
+RUN sbt package
+
