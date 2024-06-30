@@ -77,42 +77,42 @@ object kafkaToMinio {
       spark.stop()
 
 
-          // println("Consume data from Kafka...")
-          //
-          // val kafkaStream = spark.readStream
-          //   .format("kafka")
-          //   .option("kafka.bootstrap.servers", "kafka-container:9092")
-          //   .option("subscribe", "drones-data")
-          //   .option("startingOffsets", "earliest")
-          //   .load()
-          //
-          // // Define schema
-          // val schema = StructType(Seq(
-          //   StructField("id", IntegerType),
-          //   StructField("time", TimestampType, nullable = false),
-          //   StructField("coordinates", StructType(Seq(
-          //     StructField("_1", FloatType),
-          //     StructField("_2", FloatType)
-          //   )), nullable = false),
-          //   StructField("percentage", IntegerType)
-          // ))
-          //
-          // // Convert JSON string to DataFrame
-          // val droneData = kafkaStream.selectExpr("CAST(value AS STRING)").as[String]
-          //   .select(from_json($"value", schema).as("data"))
-          //   .select("data.*")
-          //
-          // println("Writing DataFrame to MinIO...")
-
-          // val query = droneData.writeStream
-          //   .outputMode("append")
-          //   .format("parquet")
-          //   .option("checkpointLocation", "/tmp/checkpoints")
-          //   .option("path", "s3a://my-bucket/streaming-data/")
-          //   .trigger(Trigger.ProcessingTime("20 seconds"))
-          //   .start()
-          //
-          // query.awaitTermination()
+      // println("Consume data from Kafka...")
+      //
+      // val kafkaStream = spark.readStream
+      //   .format("kafka")
+      //   .option("kafka.bootstrap.servers", "kafka-container:9092")
+      //   .option("subscribe", "drones-data")
+      //   .option("startingOffsets", "earliest")
+      //   .load()
+      //
+      // // Define schema
+      // val schema = StructType(Seq(
+      //   StructField("id", IntegerType),
+      //   StructField("time", TimestampType, nullable = false),
+      //   StructField("coordinates", StructType(Seq(
+      //     StructField("_1", FloatType),
+      //     StructField("_2", FloatType)
+      //   )), nullable = false),
+      //   StructField("percentage", IntegerType)
+      // ))
+      //
+      //   // Convert JSON string to DataFrame
+      // val droneData = kafkaStream.selectExpr("CAST(value AS STRING)").as[String]
+      //   .select(from_json($"value", schema).as("data"))
+      //   .select("data.*")
+      //
+      // println("Writing DataFrame to MinIO...")
+      //
+      // val query = droneData.writeStream
+      //   .outputMode("append") 
+      //   .format("parquet") 
+      //   .option("checkpointLocation", "/tmp/checkpoints") 
+      //   .option("path", "s3a://my-bucket/streaming-data/") 
+      //   .trigger(Trigger.ProcessingTime("20 seconds"))
+      //   .start()
+      //
+      // query.awaitTermination()
   }
 }
 
