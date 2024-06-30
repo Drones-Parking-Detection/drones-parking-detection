@@ -40,27 +40,27 @@ object Statistic {
 
     df.show()
 
-def getRegion(latitude: Float, longitude: Float): String = {
+    def getRegion(latitude: Float, longitude: Float): String = {
       (latitude, longitude) match {
-        case (lat, lon) if lat >= 44.0 && lat <= 45.5 && lon >= 4.0 && lon <= 5.0 => "FR-ARA"  // Auvergne-Rhône-Alpes
-        case (lat, lon) if lat >= 46.0 && lat <= 48.0 && lon >= 4.0 && lon <= 7.0 => "FR-BFC"  // Bourgogne-Franche-Comté
-        case (lat, lon) if lat >= 47.0 && lat <= 49.0 && lon >= -5.0 && lon <= -1.0 => "FR-BRE" // Bretagne
-        case (lat, lon) if lat >= 46.0 && lat <= 48.0 && lon >= 0.0 && lon <= 3.0 => "FR-CVL"  // Centre-Val de Loire
-        case (lat, lon) if lat >= 41.0 && lat <= 43.0 && lon >= 8.0 && lon <= 10.0 => "FR-COR" // Corse
-        case (lat, lon) if lat >= 48.0 && lat <= 50.0 && lon >= 6.0 && lon <= 8.0 => "FR-GES"  // Grand Est
-        case (lat, lon) if lat >= 49.0 && lat <= 51.0 && lon >= 1.0 && lon <= 4.0 => "FR-HDF"  // Hauts-de-France
-        case (lat, lon) if lat >= 48.0 && lat <= 49.0 && lon >= 2.0 && lon <= 3.0 => "FR-IDF"  // Île-de-France
-        case (lat, lon) if lat >= 49.0 && lat <= 50.0 && lon >= -1.0 && lon <= 1.0 => "FR-NOR"  // Normandie
-        case (lat, lon) if lat >= 44.0 && lat <= 46.0 && lon >= -1.0 && lon <= 1.0 => "FR-NAQ"  // Nouvelle-Aquitaine
-        case (lat, lon) if lat >= 43.0 && lat <= 45.0 && lon >= 1.0 && lon <= 4.0 => "FR-OCC"  // Occitanie
-        case (lat, lon) if lat >= 47.0 && lat <= 48.0 && lon >= -2.0 && lon <= 0.0 => "FR-PDL"  // Pays de la Loire
-        case (lat, lon) if lat >= 43.0 && lat <= 45.0 && lon >= 5.0 && lon <= 7.0 => "FR-PAC"  // Provence-Alpes-Côte d'Azur
+        case (lat, lon) if lat >= 44.0 && lat <= 46.5 && lon >= 4.0 && lon <= 7.5 => "FR-ARA"  // Auvergne-Rhône-Alpes
+        case (lat, lon) if lat >= 46.0 && lat <= 48.5 && lon >= 3.0 && lon <= 7.5 => "FR-BFC"  // Bourgogne-Franche-Comté
+        case (lat, lon) if lat >= 47.0 && lat <= 49.0 && lon >= -5.5 && lon <= -1.0 => "FR-BRE" // Bretagne
+        case (lat, lon) if lat >= 46.0 && lat <= 48.0 && lon >= 0.0 && lon <= 3.5 => "FR-CVL"  // Centre-Val de Loire
+        case (lat, lon) if lat >= 41.5 && lat <= 43.0 && lon >= 8.5 && lon <= 9.5 => "FR-COR"  // Corse
+        case (lat, lon) if lat >= 47.5 && lat <= 50.5 && lon >= 4.5 && lon <= 8.0 => "FR-GES"  // Grand Est
+        case (lat, lon) if lat >= 49.0 && lat <= 51.0 && lon >= 1.5 && lon <= 4.5 => "FR-HDF"  // Hauts-de-France
+        case (lat, lon) if lat >= 48.0 && lat <= 49.0 && lon >= 2.0 && lon <= 3.5 => "FR-IDF"  // Île-de-France
+        case (lat, lon) if lat >= 48.5 && lat <= 50.0 && lon >= -1.5 && lon <= 1.5 => "FR-NOR"  // Normandie
+        case (lat, lon) if lat >= 43.0 && lat <= 46.5 && lon >= -1.5 && lon <= 1.5 => "FR-NAQ"  // Nouvelle-Aquitaine
+        case (lat, lon) if lat >= 42.5 && lat <= 45.5 && lon >= 1.0 && lon <= 4.5 => "FR-OCC"  // Occitanie
+        case (lat, lon) if lat >= 46.5 && lat <= 48.5 && lon >= -2.5 && lon <= 0.0 => "FR-PDL"  // Pays de la Loire
+        case (lat, lon) if lat >= 43.0 && lat <= 45.0 && lon >= 5.0 && lon <= 7.5 => "FR-PAC"  // Provence-Alpes-Côte d'Azur
         case _ => "UNKNOWN"
       }
     }
 
 
-     val getRegionUDF = udf(getRegion _)
+    val getRegionUDF = udf(getRegion _)
 
     // Ajouter la colonne région
     val dfWithRegion = df.withColumn("latitude", $"coordinates._1")
@@ -106,4 +106,4 @@ def getRegion(latitude: Float, longitude: Float): String = {
 
     spark.stop()
   }
-   }
+}
