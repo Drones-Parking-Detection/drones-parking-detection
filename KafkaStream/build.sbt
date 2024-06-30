@@ -2,6 +2,12 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "2.13.14"
 
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
+
+
 libraryDependencies ++= Seq(
   "org.apache.kafka" % "kafka-clients" % "2.8.0",
   "org.apache.kafka" % "kafka-streams" % "2.8.0",
@@ -15,5 +21,5 @@ libraryDependencies ++= Seq(
 )
 lazy val root = (project in file("."))
   .settings(
-    name := "drones-parking-detection"
+    name := "KafkaStream"
   )

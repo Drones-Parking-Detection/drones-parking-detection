@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
 
 lazy val root = (project in file("."))
   .settings(
-    name := "Consumer"
+    name := "ConsumerAlerts"
   )
 
 
