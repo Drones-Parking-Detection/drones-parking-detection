@@ -12,7 +12,7 @@ import java.util.Properties
 object KafkaStream extends App {
   val streamsConfig = new Properties()
   streamsConfig.put(StreamsConfig.APPLICATION_ID_CONFIG, "alerts-application")
-  streamsConfig.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+  streamsConfig.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "broker:9092")
   streamsConfig.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.intSerde.getClass)
   streamsConfig.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.stringSerde.getClass)
 

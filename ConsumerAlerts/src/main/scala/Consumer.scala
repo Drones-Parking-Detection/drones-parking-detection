@@ -11,7 +11,7 @@ import ujson._
 object Consumer extends App{
   val logger = LoggerFactory.getLogger(Consumer.getClass)
   val props = new Properties()
-  props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092") // Update with your Kafka broker address
+  props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "broker:9092") // Update with your Kafka broker address
   props.put(ConsumerConfig.GROUP_ID_CONFIG, "alert-consumer-group")
   props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[IntegerDeserializer].getName)
   props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer].getName)
@@ -36,7 +36,7 @@ object Consumer extends App{
       )
 
       val response = requests.post(
-        url = "http://localhost:5000/add_alert",
+        url = "http://webapp:5000/add_alert",
         data = write(alertData),
         headers = Map("Content-Type" -> "application/json")
       )
