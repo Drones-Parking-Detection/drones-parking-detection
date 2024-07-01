@@ -24,6 +24,13 @@ object Statistic {
 
     import spark.implicits._
 
+     // Lire les données depuis MinIO
+    val rawDF = spark.read.parquet("s3a://my-bucket/streaming-data/")
+
+    // Afficher le schéma des données
+    rawDF.printSchema()
+
+    // Définir le schéma des données JSON
     val schema = StructType(Array(
       StructField("id", IntegerType, true),
       StructField("time", TimestampType, true),
@@ -34,11 +41,26 @@ object Statistic {
       StructField("percentage", IntegerType, true)
     ))
 
-    val df = spark.read
-      .schema(schema)
-      .parquet("s3a://my-bucket/streaming-data/")
+    // Parser le JSON contenu dans la colonne 'value'
+    val parsedDF = rawDF.selectExpr("CAST(value AS STRING) as json")
+      .select(from_json($"json", schema).as("data"))
+      .select("data.*")
 
-    df.show()
+    // Extraire les éléments du tableau de coordonnées
+    val dfWithCoordinates = parsedDF
+      .withColumn("latitude", $"coordinates".getItem(0))
+      .withColumn("longitude", $"coordinates".getItem(1))
+      .drop("coordinates")
+
+    dfWithCoordinates.show(false)
+
+    
+    //
+    // val df = spark.read
+    //   .schema(schema)
+    //   .parquet("s3a://my-bucket/streaming-data/")
+    //
+    // df.show()
 
     def getRegion(latitude: Float, longitude: Float): String = {
       (latitude, longitude) match {
@@ -63,7 +85,7 @@ object Statistic {
     val getRegionUDF = udf(getRegion _)
 
     // Ajouter la colonne région
-    val dfWithRegion = df.withColumn("latitude", $"coordinates._1")
+    val dfWithRegion = parsedDF.withColumn("latitude", $"coordinates._1")
       .withColumn("longitude", $"coordinates._2")
       .drop("coordinates")
       .withColumn("region", getRegionUDF($"latitude", $"longitude"))
@@ -72,7 +94,7 @@ object Statistic {
 
     // Filtrer les données pour obtenir celles de l'année dernière jusqu'au jour précis
     val today = LocalDate.now
-    val lastYearStart = today.minusYears(1)
+    val lastYearStart = today
     val lastYearEnd = today.minusDays(1)
 
     val dfLastYear = dfWithRegion.filter(
