@@ -7,14 +7,10 @@ import java.time.LocalDate
 case class DroneData(id: Int, time: Timestamp, coordinates: (Float, Float), percentage: Int)
 
 object Statistic {
-  def getRegion(latitude: Float, longitude: Float): String = {
-      // Dummy implementation: replace with actual logic to determine region
-      if (latitude > 45.0) "Region_A" else "Region_B"
-    }
-
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
       .appName("Statistic")
+      .master("local[*]") // Set master URL here
       .config("spark.hadoop.fs.s3a.endpoint", "http://s3:9000")
       .config("spark.hadoop.fs.s3a.access.key", "UserParking")
       .config("spark.hadoop.fs.s3a.secret.key", "PassWordParking")
@@ -24,29 +20,28 @@ object Statistic {
 
     import spark.implicits._
 
-     // Lire les données depuis MinIO
-    val rawDF = spark.read.parquet("s3a://my-bucket/streaming-data/")
+     // Read data from MinIO
+    val rawDF = spark
+      .read
+      .parquet("s3a://my-bucket/streaming-data/")
 
-    // Afficher le schéma des données
     rawDF.printSchema()
+    rawDF.show(false)
 
-    // Définir le schéma des données JSON
+    // Shame of data
     val schema = StructType(Array(
       StructField("id", IntegerType, true),
       StructField("time", TimestampType, true),
-      StructField("coordinates", StructType(Array(
-        StructField("_1", FloatType, true),
-        StructField("_2", FloatType, true)
-      )), true),
+      StructField("coordinates", ArrayType(FloatType, true)),
       StructField("percentage", IntegerType, true)
     ))
 
-    // Parser le JSON contenu dans la colonne 'value'
-    val parsedDF = rawDF.selectExpr("CAST(value AS STRING) as json")
-      .select(from_json($"json", schema).as("data"))
+    val parsedDF = rawDF.selectExpr("CAST(value AS STRING)")
+      .select(from_json($"value", schema).as("data"))
       .select("data.*")
 
-    // Extraire les éléments du tableau de coordonnées
+    parsedDF.show()
+
     val dfWithCoordinates = parsedDF
       .withColumn("latitude", $"coordinates".getItem(0))
       .withColumn("longitude", $"coordinates".getItem(1))
@@ -54,29 +49,12 @@ object Statistic {
 
     dfWithCoordinates.show(false)
 
-    
-    //
-    // val df = spark.read
-    //   .schema(schema)
-    //   .parquet("s3a://my-bucket/streaming-data/")
-    //
-    // df.show()
-
     def getRegion(latitude: Float, longitude: Float): String = {
       (latitude, longitude) match {
-        case (lat, lon) if lat >= 44.0 && lat <= 46.5 && lon >= 4.0 && lon <= 7.5 => "FR-ARA"  // Auvergne-Rhône-Alpes
-        case (lat, lon) if lat >= 46.0 && lat <= 48.5 && lon >= 3.0 && lon <= 7.5 => "FR-BFC"  // Bourgogne-Franche-Comté
-        case (lat, lon) if lat >= 47.0 && lat <= 49.0 && lon >= -5.5 && lon <= -1.0 => "FR-BRE" // Bretagne
-        case (lat, lon) if lat >= 46.0 && lat <= 48.0 && lon >= 0.0 && lon <= 3.5 => "FR-CVL"  // Centre-Val de Loire
-        case (lat, lon) if lat >= 41.5 && lat <= 43.0 && lon >= 8.5 && lon <= 9.5 => "FR-COR"  // Corse
-        case (lat, lon) if lat >= 47.5 && lat <= 50.5 && lon >= 4.5 && lon <= 8.0 => "FR-GES"  // Grand Est
-        case (lat, lon) if lat >= 49.0 && lat <= 51.0 && lon >= 1.5 && lon <= 4.5 => "FR-HDF"  // Hauts-de-France
-        case (lat, lon) if lat >= 48.0 && lat <= 49.0 && lon >= 2.0 && lon <= 3.5 => "FR-IDF"  // Île-de-France
-        case (lat, lon) if lat >= 48.5 && lat <= 50.0 && lon >= -1.5 && lon <= 1.5 => "FR-NOR"  // Normandie
-        case (lat, lon) if lat >= 43.0 && lat <= 46.5 && lon >= -1.5 && lon <= 1.5 => "FR-NAQ"  // Nouvelle-Aquitaine
-        case (lat, lon) if lat >= 42.5 && lat <= 45.5 && lon >= 1.0 && lon <= 4.5 => "FR-OCC"  // Occitanie
-        case (lat, lon) if lat >= 46.5 && lat <= 48.5 && lon >= -2.5 && lon <= 0.0 => "FR-PDL"  // Pays de la Loire
-        case (lat, lon) if lat >= 43.0 && lat <= 45.0 && lon >= 5.0 && lon <= 7.5 => "FR-PAC"  // Provence-Alpes-Côte d'Azur
+        case (lat, lon) if lat >= 46.23 && lon >= 2.21 => "NE"
+        case (lat, lon) if lat >= 46.23 && lon < 2.21 => "NO"
+        case (lat, lon) if lat < 46.23 && lon >= 2.21 => "SE"
+        case (lat, lon) if lat < 46.23 && lon < 2.21 => "SO"
         case _ => "UNKNOWN"
       }
     }
@@ -84,23 +62,18 @@ object Statistic {
 
     val getRegionUDF = udf(getRegion _)
 
-    // Ajouter la colonne région
-    val dfWithRegion = parsedDF.withColumn("latitude", $"coordinates._1")
-      .withColumn("longitude", $"coordinates._2")
-      .drop("coordinates")
-      .withColumn("region", getRegionUDF($"latitude", $"longitude"))
+    val dfWithRegion = dfWithCoordinates.withColumn("region", getRegionUDF($"latitude", $"longitude"))
 
-    dfWithRegion.show()
+    dfWithRegion.show(false)
 
-    // Filtrer les données pour obtenir celles de l'année dernière jusqu'au jour précis
     val today = LocalDate.now
     val lastYearStart = today
     val lastYearEnd = today.minusDays(1)
 
     val dfLastYear = dfWithRegion.filter(
       $"time".between(
-        java.sql.Timestamp.valueOf(lastYearStart.atStartOfDay),
-        java.sql.Timestamp.valueOf(lastYearEnd.atTime(23, 59, 59))
+        java.sql.Timestamp.valueOf(today.atStartOfDay),
+        java.sql.Timestamp.valueOf(today.atTime(23, 59, 59))
       )
     )
 
@@ -114,8 +87,9 @@ object Statistic {
 
     stats.show()
 
-    val dropTableQuery = "DROP TABLE IF EXISTS region_parking_stats_last_year"
-    spark.sqlContext.sql(dropTableQuery)
+    // drop table before adding for testing
+    // val dropTableQuery = "DROP TABLE IF EXISTS region_parking_stats_last_year"
+    // spark.sqlContext.sql(dropTableQuery)
 
     stats.write
       .format("jdbc")
