@@ -101,6 +101,10 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=PassWordParking
     depends_on:
       - postgres
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
 
   topic-creator:
     image: confluentinc/cp-kafka:6.2.0
@@ -143,12 +147,11 @@ services:
     hostname: "webapp"
     container_name: "webapp-container"
     ports:
-      - "5000:5000"
+      - "5001:5000"
     depends_on:
       - kafka
 
 
 volumes:
   pgdata:
-
-
+  grafana-storage:
