@@ -11,11 +11,11 @@ help:
 
 kafka:
 	@echo "Building Kafka... Run 'make check_kafka to see if it is finished before launching 'make services'"
-	docker compose up --build zookeeper kafka topic-creator -d
+	docker compose up --build zookeeper kafka topic-creator
 	@echo "Building Kafka... Run 'make check_kafka to see if it is finished before launching 'make services'"
 
 services:
-	docker compose up --build -d
+	docker compose up --build
 
 check_kafka:
 	@container_status=$$(docker ps -a --filter "name=topic-creator-1" --format "{{.Status}}"); \
