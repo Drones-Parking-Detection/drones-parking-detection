@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL Parking
+    type: postgres
+    url: postgres-container:5432
+    user: UserParking
+    secureJsonData:
+      password: PassWordParking
+    jsonData:
+      database: DBParking
+      sslmode: disable
+      postgresVersion: 1300  # Assurez-vous que cette version correspond à celle de votre PostgreSQL
+      timescaledb: false
+    uid: postgres-parking
