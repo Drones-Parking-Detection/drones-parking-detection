@@ -1,10 +1,12 @@
 all: help
 help:
+	@echo "step 1 = kafka, step 2 = check_kafka, step3 = services, step 4 = send_data"
 	@echo "Usage:"
 	@echo "  make kafka"
 	@echo "  make services"
 	@echo "  make check_kafka"
 	@echo "  make check_logs 'containername'"
+
 
 
 kafka:
