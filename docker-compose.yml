@@ -10,7 +10,6 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
 
-
   kafka:
     image: confluentinc/cp-kafka:6.2.0
     container_name: broker
@@ -30,9 +29,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_JMX_PORT: 9101
-      KAFKA_JMX_HOSTNAME: localhost
-
 
 
 
@@ -106,6 +102,14 @@ services:
     depends_on:
       - postgres
 
+  topic-creator:
+    image: confluentinc/cp-kafka:6.2.0
+    depends_on:
+      - kafka
+    entrypoint: /bin/sh -c "cub kafka-ready -b kafka:9092 1 20 && \
+      kafka-topics --create --topic drones-data --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 && \
+      kafka-topics --create --topic alert-data --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1"
+
   kafkastream:
     build:
       context: ./KafkaStream
@@ -113,6 +117,7 @@ services:
     container_name: "kafkastream-container"
     depends_on:
       - kafka
+      - topic-creator
 
 
   consumeralerts:
