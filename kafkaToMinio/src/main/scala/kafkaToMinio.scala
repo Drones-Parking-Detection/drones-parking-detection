@@ -44,7 +44,7 @@ object kafkaToMinio {
           .format("parquet")
           .option("checkpointLocation", "/tmp/checkpoints")
           .option("path", "s3a://my-bucket/streaming-data/")
-          .trigger(Trigger.ProcessingTime("20 seconds"))
+          .trigger(Trigger.ProcessingTime("1 minute"))
           .start()
 
         query.awaitTermination()
