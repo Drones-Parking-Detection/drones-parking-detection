@@ -34,12 +34,10 @@ check_logs:
 send_data:
 	docker exec -it drone-container sbt run
 
+statistic:
+	docker exec -it spark-statistic-container /opt/bitnami/spark/bin/spark-submit --class Statistic /opt/spark-apps/target/scala-2.12/spark-apps_2.12-0.1.0-SNAPSHOT.jar
+
 # Pass arguments to check_logs
 ARGS = $(filter-out $@,$(MAKECMDGOALS))
 %:
 	@:
-
-
-
-
-

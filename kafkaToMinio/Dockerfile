@@ -2,7 +2,6 @@ FROM bitnami/spark:3.3.2
 
 USER root
 
-# Installer les dépendances nécessaires, y compris sbt
 RUN apt-get update && \
     apt-get install -y python3-pip wget curl gnupg2 vim && \
     pip3 install boto3 && \
@@ -15,20 +14,11 @@ RUN apt-get update && \
     ln -s /opt/sbt/bin/sbt /usr/local/bin/sbt && \
     rm sbt-1.10.0.tgz
 
-#USER 1001
-
-
 RUN mkdir -p /opt/spark-apps
 WORKDIR /opt/spark-apps
 
 COPY . /opt/spark-apps
 
-#RUN wget https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.12/3.1.2/spark-sql-kafka-0-10_2.12-3.1.2.jar -P /opt/bitnami/spark/jars/
-
-
 RUN sbt assembly
 
-
-
-
-
+ENTRYPOINT ["sbt", "run"]

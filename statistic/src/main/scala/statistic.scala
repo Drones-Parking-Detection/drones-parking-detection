@@ -77,7 +77,12 @@ object Statistic {
       )
     )
 
-    val dfStatus = dfLastYear.withColumn("is_free", $"percentage" < 10)
+    val threshold: Int = sys.env.get("FREE_PARKING_THRESHOLD") match {
+      case Some(value) => value.toInt
+      case None => 10
+    }
+
+    val dfStatus = dfLastYear.withColumn("is_free", $"percentage" < threshold)
 
     val stats = dfStatus.groupBy("region")
       .agg(

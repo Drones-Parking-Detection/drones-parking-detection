@@ -2,7 +2,6 @@ FROM bitnami/spark:3.3.2
 
 USER root
 
-# Installer les dépendances nécessaires, y compris sbt
 RUN apt-get update && \
     apt-get install -y python3-pip wget curl gnupg2 vim && \
     pip3 install boto3 && \

@@ -41,7 +41,7 @@ services:
       - MINIO_ROOT_USER=UserParking
       - MINIO_ROOT_PASSWORD=PassWordParking
     volumes:
-      - "~/minio/data:/data"
+      - "./minio/data:/data"
     ports:
       - "9000:9000" # Operation
       - "9090:9090" # Interface
@@ -122,6 +122,8 @@ services:
     depends_on:
       - kafka
       - topic-creator
+    env_file:
+      - varibles.env
 
 
   consumeralerts:
