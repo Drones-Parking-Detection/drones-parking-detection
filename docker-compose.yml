@@ -1,4 +1,36 @@
 services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:6.2.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+
+  kafka:
+    image: confluentinc/cp-kafka:6.2.0
+    container_name: broker
+    hostname: broker
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+      - "9092:9092"
+      - "9101:9101"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://broker:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+
   s3:
     image: quay.io/minio/minio
     container_name: "s3-container"
@@ -7,19 +39,18 @@ services:
       - MINIO_ROOT_USER=UserParking
       - MINIO_ROOT_PASSWORD=PassWordParking
     volumes:
-      - "~/minio/data:/data"
+      - "./minio/data:/data"
     ports:
       - "9000:9000" # Operation
       - "9090:9090" # Interface
   
-  spark:
+  spark_kafkatominio:
     build:
-      context: ./processToDataLake
+      context: ./kafkaToMinio
       dockerfile: Dockerfile
-    container_name: "spark-container"
+    container_name: "spark-kafkatominio-container"
     depends_on:
       - s3
-      - zookeeper
       - kafka
     environment:
       - SPARK_MASTER_NAME=spark-master
@@ -28,6 +59,99 @@ services:
       - SPARK_WORKER_MEMORY=2G
       - SPARK_DRIVER_MEMORY=2G
     ports:
-      - "4040:4040" # Spark UI
-      - "7077:7077" # Spark Master
-      - "8081:8081" # Spark Worker UI
+      - "7077:7077"
+
+
+  spark_statistic:
+    build:
+      context: ./statistic
+      dockerfile: Dockerfile
+    container_name: "spark-statistic-container"
+    depends_on:
+      - s3
+      - postgres
+    environment:
+      - SPARK_MASTER_NAME=spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_DRIVER_MEMORY=2G
+
+  postgres:
+    image: postgres:13
+    container_name: "postgres-container"
+    environment:
+      POSTGRES_USER: UserParking
+      POSTGRES_PASSWORD: PassWordParking
+      POSTGRES_DB: DBParking
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  grafana:
+    image: grafana/grafana
+    container_name: "grafana-container"
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=UserParking
+      - GF_SECURITY_ADMIN_PASSWORD=PassWordParking
+    depends_on:
+      - postgres
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+
+  topic-creator:
+    image: confluentinc/cp-kafka:6.2.0
+    depends_on:
+      - kafka
+    entrypoint: /bin/sh -c "cub kafka-ready -b kafka:9092 1 20 && \
+      kafka-topics --create --topic drones-data --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 && \
+      kafka-topics --create --topic alert-data --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1"
+
+  kafkastream:
+    build:
+      context: ./KafkaStream
+      dockerfile: Dockerfile
+    container_name: "kafkastream-container"
+    depends_on:
+      - kafka
+      - topic-creator
+    env_file:
+      - varibles.env
+
+
+  consumeralerts:
+    build:
+      context: ./ConsumerAlerts
+      dockerfile: Dockerfile
+    container_name: "consumeralerts-container"
+    depends_on:
+      - kafka
+
+  drones:
+    build:
+      context: ./Drone
+      dockerfile: Dockerfile
+    container_name: "drone-container"
+    depends_on:
+      - kafka
+
+  webapp:
+    build:
+      context: ./webapp-alerts
+      dockerfile: Dockerfile
+    hostname: "webapp"
+    container_name: "webapp-container"
+    ports:
+      - "5001:5000"
+    depends_on:
+      - kafka
+
+
+volumes:
+  pgdata:
+  grafana-storage:

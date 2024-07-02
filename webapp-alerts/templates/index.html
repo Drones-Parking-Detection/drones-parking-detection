@@ -67,23 +67,8 @@
     </div>
     
     <script>
-        // const map = L.map('map').setView([46.603354, 2], 7.2);
-
-        // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        // }).addTo(map);
-
-
         $(document).ready(function () {
             let socket = io();
-
-            // socket.on('connect', function () {
-            //     console.log('Connected to server');
-            // });
-
-            // socket.on('disconnect', function () {
-            //     console.log('Disconnected from server');
-            // });
-
             socket.on('new_alert', function (alert) {
                 $('#alerts-list').append('<li>' + JSON.stringify(alert) + '</li>');
                 console.log(alert)
@@ -92,16 +77,8 @@
         });
 
         const map = L.map('map').setView([46.603354, 2], 7.2);
-
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         }).addTo(map);
-
-        // const heat = L.heatLayer([], {
-        //     radius: 70,
-        //     blur: 0,
-        //     maxZoom: 17,
-        //     gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' }
-        // }).addTo(map);
 
         let markers = {};
         let ID = 0
@@ -110,11 +87,6 @@
             const marker = L.marker([alert.coordinates[0], alert.coordinates[1]]).addTo(map);
             markers[ID] = marker;
             marker.bindPopup(`<b>${alert.address}</b><br>${alert.timestamp}`).openPopup();
-
-            // heat.addLatLng([alert.coordinates[0], alert.coordinates[1], 10]);
-            // console.log("Added to heatmap: ", [alert.coordinates[0], alert.coordinates[1], 2]);
-            // console.log(heat.addLatLng())
-
 
             const sidebarItem = document.createElement('div');
             sidebarItem.classList.add('alert-item');
@@ -144,19 +116,11 @@
             }
 
             if (markers[alertId]) {
-                // const latlng = markers[alertId].getLatLng();
-                // console.log(latlng)
-                // console.log(heat._latlngs)
-                // heat.setLatLngs(heat._latlngs.filter(ll => !(ll[0] === latlng.lat && ll[1] === latlng.lng)));
                 map.removeLayer(markers[alertId]);
                 delete markers[alertId];
             }
-
             updateAlertTitle();
         }
-
-
-
     </script>
 </body>
 
