@@ -19,6 +19,12 @@ WORKDIR /opt/spark-apps
 
 COPY . /opt/spark-apps
 
-RUN sbt assembly
+#RUN export JAVA_OPTS='--add-exports java.base/sun.nio.ch=ALL-UNNAMED'
+#RUN export SPARK_DRIVER_EXTRA_JAVA_OPTIONS="--add-exports java.base/sun.nio.ch=ALL-UNNAMED"
+#RUN export SPARK_EXECUTOR_EXTRA_JAVA_OPTIONS="--add-exports java.base/sun.nio.ch=ALL-UNNAMED"
+#RUN echo 'export SPARK_DRIVER_EXTRA_JAVA_OPTIONS="--add-exports java.base/sun.nio.ch=ALL-UNNAMED"' >> /opt/bitnami/spark/conf/spark-env.sh && \
+#    echo 'export SPARK_EXECUTOR_EXTRA_JAVA_OPTIONS="--add-exports java.base/sun.nio.ch=ALL-UNNAMED"' >> /opt/bitnami/spark/conf/spark-env.sh
+
+RUN sbt package
 
 ENTRYPOINT ["sbt", "run"]

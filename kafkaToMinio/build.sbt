@@ -4,6 +4,8 @@ version := "0.1"
 
 scalaVersion := "2.13.10"
 
+fork := true
+
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-bundle" % "1.11.874",
 
@@ -23,3 +25,10 @@ assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case x => MergeStrategy.first
 }
+
+lazy val root= (project in file("."))
+  .settings(
+    javaOptions ++= Seq( // Spark-specific JVM options
+      "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+    )
+  )
