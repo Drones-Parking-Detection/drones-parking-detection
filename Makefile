@@ -6,6 +6,8 @@ help:
 	@echo "  make services"
 	@echo "  make check_kafka"
 	@echo "  make check_logs 'containername'"
+	@echo "  make send_data"
+	@echo "  make stats"
 
 
 
