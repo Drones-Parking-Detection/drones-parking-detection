@@ -1,4 +1,4 @@
-FROM bitnami/spark:3.1.2
+FROM bitnami/spark:3.3.2
 
 USER root
 

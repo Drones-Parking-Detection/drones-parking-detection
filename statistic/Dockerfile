@@ -1,4 +1,4 @@
-FROM bitnami/spark:3.1.2
+FROM bitnami/spark:3.3.2
 
 USER root
 
@@ -16,7 +16,7 @@ RUN apt-get update && \
 
 RUN wget https://jdbc.postgresql.org/download/postgresql-42.2.20.jar -P /opt/bitnami/spark/jars/
 
-USER 1001
+# USER 1001
 
 
 RUN mkdir -p /opt/spark-apps
