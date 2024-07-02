@@ -22,10 +22,16 @@ object KafkaStream extends App {
   val wronglyParkedTopic : String = "alert-data"
 
   val inputStream = builder.stream[Int, String](inputTopic)
+  val threshold: Int = sys.env.get("PARKING_ALERT_THRESHOLD") match {
+    case Some(value) => value.toInt
+    case None => 85
+  }
+
+  println("threshold: "+ threshold)
 
   val alertProcessedStream = inputStream
     .mapValues(x => fromJson(x).getOrElse(DroneData(-1, LocalDateTime.now(), (-1,-1), -1)))
-    .filter((_, data) => data.percentage < 50)
+    .filter((_, data) => data.percentage > threshold)
     .mapValues(x => toJson(x))
 
 
