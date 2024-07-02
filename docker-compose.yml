@@ -31,8 +31,6 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
 
-
-
   s3:
     image: quay.io/minio/minio
     container_name: "s3-container"

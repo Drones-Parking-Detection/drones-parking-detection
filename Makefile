@@ -1,6 +1,6 @@
 all: help
 help:
-	@echo "step 1 = kafka, step 2 = check_kafka, step3 = services, step 4 = send_data"
+	@echo "step 1 = kafka, step 2 = check_kafka, step3 = services, step 4 = send_data, step 5 = stats"
 	@echo "Usage:"
 	@echo "  make kafka"
 	@echo "  make services"
@@ -41,7 +41,6 @@ stats:
 	docker exec -it spark-statistic-container /opt/bitnami/spark/bin/spark-submit --class Statistic /opt/spark-apps/target/scala-2.12/statistic_2.12-0.1.0-SNAPSHOT.jar
 
 
-# Pass arguments to check_logs
 ARGS = $(filter-out $@,$(MAKECMDGOALS))
 %:
 	@:

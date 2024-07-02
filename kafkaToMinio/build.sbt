@@ -28,7 +28,7 @@ assemblyMergeStrategy in assembly := {
 
 lazy val root= (project in file("."))
   .settings(
-    javaOptions ++= Seq( // Spark-specific JVM options
+    javaOptions ++= Seq(
       "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
     )
   )

@@ -14,7 +14,7 @@ object kafkaToMinio {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
           .appName("KafkaToMinio")
-          .master("local[*]") // Set master URL here
+          .master("local[*]")
           .config("spark.hadoop.fs.s3a.endpoint", "http://s3:9000")
           .config("spark.hadoop.fs.s3a.access.key", "UserParking")
           .config("spark.hadoop.fs.s3a.secret.key", "PassWordParking")

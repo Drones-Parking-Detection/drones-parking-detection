@@ -10,6 +10,6 @@ datasources:
     jsonData:
       database: DBParking
       sslmode: disable
-      postgresVersion: 1300  # Assurez-vous que cette version correspond à celle de votre PostgreSQL
+      postgresVersion: 1300
       timescaledb: false
     uid: postgres-parking

@@ -9,7 +9,7 @@ libraryDependencies ++= Seq(
 
 lazy val statistic= (project in file("."))
   .settings(
-    javaOptions ++= Seq( // Spark-specific JVM options
+    javaOptions ++= Seq(
       "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
     )
   )
