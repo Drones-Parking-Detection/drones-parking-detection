@@ -2,6 +2,7 @@
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecords, KafkaConsumer}
 import org.apache.kafka.common.serialization.{IntegerDeserializer, StringDeserializer}
 import org.slf4j.LoggerFactory
+import scala.annotation.tailrec
 
 import java.util.Properties
 import scala.collection.JavaConverters._
@@ -21,7 +22,8 @@ object Consumer extends App{
   consumer.subscribe(List("alert-data").asJava)
 
 
-  while (true) {
+  @tailrec
+  def loop(): Unit = {
     val records: ConsumerRecords[Int, String] = consumer.poll(java.time.Duration.ofMillis(100))
     records.asScala.foreach { record =>
       logger.debug(s"Key: ${record.key()}, Value: ${record.value()}")
@@ -30,14 +32,14 @@ object Consumer extends App{
       val alertData = Obj(
         "id" -> alertDataTmp("id"),
         "timestamp" -> alertDataTmp("time"),
-        "coordinates" -> Arr(alertDataTmp("coordinates").arr(0), alertDataTmp("coordinates").arr(1)),
+        "coordinates" -> ujson.Arr(alertDataTmp("coordinates").arr(0), alertDataTmp("coordinates").arr(1)),
         "percentage" -> alertDataTmp("percentage"),
         "address" -> "France"
       )
 
       val response = requests.post(
         url = "http://webapp:5000/add_alert",
-        data = write(alertData),
+        data = ujson.write(alertData),
         headers = Map("Content-Type" -> "application/json")
       )
 
@@ -48,5 +50,8 @@ object Consumer extends App{
         logger.debug(s"Failed to send alert to server: ${response.statusCode} ${response.text()}")
       }
     }
+    loop()
   }
+
+  loop()
 }
